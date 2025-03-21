@@ -55,3 +55,10 @@ def colored_to_gray_img(img_name: str, mode: str = "RGB"):
     else:
         print(f"Invalid mode {mode}.")
         return None
+
+def _crop_zeros(arr: np.ndarray):
+    arr = arr.copy()
+    arr = arr[~np.all(arr == 0, axis = 1)]
+    arr = arr[:, ~np.all(arr == 0, axis = 0)]
+
+    return arr

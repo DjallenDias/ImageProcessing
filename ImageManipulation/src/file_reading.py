@@ -43,7 +43,28 @@ def _read_3d_files(file: TextIOWrapper):
     return np.array(values_3d_list)
 
 def _read_detailed_files(file: TextIOWrapper):
-    pass
+    res = dict()
+
+    file.readline()
+    offset_val = file.readline()
+    offset_val_ver = _type_verification(offset_val)
+    if offset_val_ver != None:
+        res["offset"] = offset_val_ver
+
+    file.readline()
+    step_val = file.readline()
+    step_val_ver = _type_verification(step_val)
+    if step_val_ver != None:
+        res["step"] = step_val_ver
+    
+    file.readline()
+    function = file.readline().replace("\n", "")
+    res["function"] = function
+
+    file.readline()
+    res["filter"] = _read_normal_files(file)
+
+    return res
 
 def _read_normal_files(file: TextIOWrapper):
     values_2d_list = []
@@ -73,11 +94,10 @@ def read_file(file_name: str):
             return _read_normal_files(open(f"Filters/NormalFilters/{file_name}"))
 
         case "DetailedFilters":
-            pass
+            return _read_detailed_files(open(f"Filters/DetailedFilters/{file_name}"))
 
         case "3DFilters":
             return _read_3d_files(open(f"Filters/3DFilters/{file_name}"))
-
 
         case _:
             print(f"Filter {file_name} folder not found")

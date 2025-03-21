@@ -82,13 +82,62 @@ def _apply_filter_in_array(arr: np.ndarray, filter: np.ndarray,
 
     arr_res = _crop_zeros(arr_res)
     arr_res = arr_res + offset
-    if actv_func:
+
+    if actv_func.lower() == "relu":
         arr_res = np.vectorize(ReLU)(arr_res)
 
-    return arr_res.astype(np.uint8)
+    return arr_res.astype(np.uint64)
+
+def _clip(arr: np.ndarray):
+    arr = arr.clip(0, 255)
+    return arr.astype(np.uint8)
+
+def _wrap(arr: np.ndarray):
+    arr = arr % 256
+    return arr.astype(np.uint8)
+
+def _expansion_array(arr: np.ndarray):
+    uniques = np.unique_counts(arr)
+    values, _ = uniques
+    aux_arr = np.zeros(values.shape)
+
+    for i in range(values.shape[0]):
+        aux = ((values[i] - values.min()) / (values.max() - values.min())) * 255
+        aux_arr[i] = int(aux)
+
+    map_d = dict(zip(values.flatten(), aux_arr.flatten()))
+
+    vec_replace = np.vectorize(lambda x: map_d.get(x, x))
+
+    res = np.array(vec_replace(arr), dtype=np.uint8)
+    return res
+
+def _equalization_array(arr: np.ndarray):
+    uniques = np.unique_counts(arr)
+    values, counts = uniques
+    aux_arr = np.zeros(values.shape)
+    sum = np.uint32(0)
+
+    for i in range(values.shape[0]):
+        sum += counts[i]
+        aux_arr[i] = int((255/arr.size) * sum)
+
+    map_d = dict(zip(values.flatten(), aux_arr.flatten()))
+
+    vec_replace = np.vectorize(lambda x: map_d.get(x, x))
+
+    res = np.array(vec_replace(arr), dtype=np.uint8)
+    return res
+
+def _overflow(arr: np.ndarray):
+    return arr.max() > 255
+
+def _underflow(arr: np.ndarray):
+    return arr.min() < 0
 
 def apply_filter(img_name: str, filter_name: str,
-                 offset: int = 0, step: int = 1, actv_func: str = ""):
+                 offset: int = 0, step: int = 1, actv_func: str = "",
+                 handle_overflow: str = "", handle_underflow: str = ""):
     
     img = _open_image(img_name)
     filter = _load_filter(filter_name)
@@ -108,5 +157,27 @@ def apply_filter(img_name: str, filter_name: str,
     r = _apply_filter_in_array(r, filter, offset, step, actv_func)
     g = _apply_filter_in_array(g, filter, offset, step, actv_func)
     b = _apply_filter_in_array(b, filter, offset, step, actv_func)
+
+    handles_methods = {"clip": _clip,
+                       "wrap": _wrap,
+                       "expansion": _expansion_array,
+                       "equalization": _equalization_array}
+
+    if (_underflow(r) or _overflow(r) or
+        _underflow(g) or _overflow(g) or
+        _underflow(b) or _overflow(b)):
+
+        if handle_overflow and handle_underflow:
+            r = handles_methods[handle_overflow](r)
+            g = handles_methods[handle_overflow](g)
+            b = handles_methods[handle_overflow](b)
+
+        else:
+            print("RGB values greater than 255 or less than 0")
+            return r, g, b
+        
+    r = r.astype(np.uint8)
+    g = g.astype(np.uint8)
+    b = b.astype(np.uint8)
 
     return _rgb_to_img(r, g, b)

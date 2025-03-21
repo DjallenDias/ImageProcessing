@@ -66,28 +66,6 @@ def _crop_zeros(arr: np.ndarray):
 
     return arr
 
-def _apply_filter_in_array(arr: np.ndarray, filter: np.ndarray,
-                           offset: int = 0, step: int = 1, actv_func: str = ""):
-    
-    arr_res = np.zeros(arr.shape)
-
-    for i in range(0, arr.shape[0], step):
-        for j in range(0, arr.shape[1], step):
-
-            arr_part = arr[i:i + filter.shape[0], j:j + filter.shape[1]]
-
-            if arr_part.shape != filter.shape: continue
-
-            arr_res[i,j] = np.sum(arr_part * filter)
-
-    arr_res = _crop_zeros(arr_res)
-    arr_res = arr_res + offset
-
-    if actv_func.lower() == "relu":
-        arr_res = np.vectorize(ReLU)(arr_res)
-
-    return arr_res.astype(np.uint64)
-
 def _clip(arr: np.ndarray):
     arr = arr.clip(0, 255)
     return arr.astype(np.uint8)
@@ -134,6 +112,28 @@ def _overflow(arr: np.ndarray):
 
 def _underflow(arr: np.ndarray):
     return arr.min() < 0
+
+def _apply_filter_in_array(arr: np.ndarray, filter: np.ndarray,
+                           offset: int = 0, step: int = 1, actv_func: str = ""):
+    
+    arr_res = np.zeros(arr.shape)
+
+    for i in range(0, arr.shape[0], step):
+        for j in range(0, arr.shape[1], step):
+
+            arr_part = arr[i:i + filter.shape[0], j:j + filter.shape[1]]
+
+            if arr_part.shape != filter.shape: continue
+
+            arr_res[i,j] = np.sum(arr_part * filter)
+
+    arr_res = _crop_zeros(arr_res)
+    arr_res = arr_res + offset
+
+    if actv_func.lower() == "relu":
+        arr_res = np.vectorize(ReLU)(arr_res)
+
+    return arr_res.astype(np.uint64)
 
 def apply_filter(img_name: str, filter_name: str,
                  offset: int = 0, step: int = 1, actv_func: str = "",

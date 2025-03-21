@@ -74,6 +74,9 @@ def _wrap(arr: np.ndarray):
     arr = arr % 256
     return arr.astype(np.uint8)
 
+def _abs(arr: np.ndarray):
+    return np.abs(arr)
+
 def _expansion_array(arr: np.ndarray):
     uniques = np.unique_counts(arr)
     values, _ = uniques
@@ -89,6 +92,13 @@ def _expansion_array(arr: np.ndarray):
 
     res = np.array(vec_replace(arr), dtype=np.uint8)
     return res
+
+def expansion(img_name: str):
+    r, g, b = _img_to_rgb_arr(_open_image(img_name))
+    r = _expansion_array(r)
+    g = _expansion_array(g)
+    b = _expansion_array(b)
+    return _rgb_to_img(r, g, b)
 
 def _equalization_array(arr: np.ndarray):
     uniques = np.unique_counts(arr)
@@ -106,6 +116,13 @@ def _equalization_array(arr: np.ndarray):
 
     res = np.array(vec_replace(arr), dtype=np.uint8)
     return res
+
+def equalization(img_name: str):
+    r, g, b = _img_to_rgb_arr(_open_image(img_name))
+    r = _equalization_array(r)
+    g = _equalization_array(g)
+    b = _equalization_array(b)
+    return _rgb_to_img(r, g, b)
 
 def _overflow(arr: np.ndarray):
     return arr.max() > 255
@@ -127,13 +144,15 @@ def _apply_filter_in_array(arr: np.ndarray, filter: np.ndarray,
 
             arr_res[i,j] = np.sum(arr_part * filter)
 
-    arr_res = _crop_zeros(arr_res)
+    if step > 1:
+        arr_res = _crop_zeros(arr_res)
+
     arr_res = arr_res + offset
 
     if actv_func.lower() == "relu":
         arr_res = np.vectorize(ReLU)(arr_res)
 
-    return arr_res.astype(np.uint64)
+    return arr_res.astype(np.int64)
 
 def apply_filter(img_name: str, filter_name: str,
                  offset: int = 0, step: int = 1, actv_func: str = "",
@@ -161,7 +180,8 @@ def apply_filter(img_name: str, filter_name: str,
     handles_methods = {"clip": _clip,
                        "wrap": _wrap,
                        "expansion": _expansion_array,
-                       "equalization": _equalization_array}
+                       "equalization": _equalization_array,
+                       "absolute": _abs}
 
     if (_underflow(r) or _overflow(r) or
         _underflow(g) or _overflow(g) or
@@ -175,9 +195,34 @@ def apply_filter(img_name: str, filter_name: str,
         else:
             print("RGB values greater than 255 or less than 0")
             return r, g, b
-        
+
     r = r.astype(np.uint8)
     g = g.astype(np.uint8)
     b = b.astype(np.uint8)
+
+    return _rgb_to_img(r, g, b)
+
+def border_detection(img_name: str):
+    img = _open_image(img_name)
+    hor_sobel = _load_filter("hor_sobel.txt")
+    ver_sobel = _load_filter("ver_sobel.txt")
+
+    r, g, b = _img_to_rgb_arr(img)
+
+    hr = _apply_filter_in_array(r, hor_sobel)
+    hg = _apply_filter_in_array(g, hor_sobel)
+    hb = _apply_filter_in_array(b, hor_sobel)
+
+    vr = _apply_filter_in_array(r, ver_sobel)
+    vg = _apply_filter_in_array(g, ver_sobel)
+    vb = _apply_filter_in_array(b, ver_sobel)
+
+    r = np.abs(hr) + np.abs(vr)
+    g = np.abs(hg) + np.abs(vg)
+    b = np.abs(hb) + np.abs(vb)
+
+    r = _expansion_array(r)
+    g = _expansion_array(g)
+    b = _expansion_array(b)
 
     return _rgb_to_img(r, g, b)

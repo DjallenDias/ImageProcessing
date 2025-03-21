@@ -7,7 +7,13 @@ FOLDERS = ["3DFilters", "DetailedFilters", "NormalFilters"]
 
 
 def _type_verification(value):
-    pass
+    try:
+        return int(value)
+    except:
+        try:
+            return float(value)
+        except:
+            return None
 
 def _read_3d_files(file: TextIOWrapper):
     pass

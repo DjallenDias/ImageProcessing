@@ -56,6 +56,9 @@ def colored_to_gray_img(img_name: str, mode: str = "RGB"):
         print(f"Invalid mode {mode}.")
         return None
 
+def ReLU(value: int | float):
+    return max(0, value)
+
 def _crop_zeros(arr: np.ndarray):
     arr = arr.copy()
     arr = arr[~np.all(arr == 0, axis = 1)]

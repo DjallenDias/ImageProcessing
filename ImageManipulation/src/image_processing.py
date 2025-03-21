@@ -130,6 +130,16 @@ def _overflow(arr: np.ndarray):
 def _underflow(arr: np.ndarray):
     return arr.min() < 0
 
+def _crop_borders(arr: np.ndarray, filter: np.ndarray):
+    center = (filter.shape[0], filter.shape[1])
+
+    lines = arr.shape[0] - (center[0] - 1)
+    cols = arr.shape[1] - (center[1] - 1)
+    
+    res_arr = arr[0:lines, 0:cols]
+    
+    return res_arr
+
 def _apply_filter_in_array(arr: np.ndarray, filter: np.ndarray,
                            offset: int = 0, step: int = 1, actv_func: str = ""):
     
@@ -146,6 +156,10 @@ def _apply_filter_in_array(arr: np.ndarray, filter: np.ndarray,
 
     if step > 1:
         arr_res = _crop_zeros(arr_res)
+
+    else:
+        arr_res = _crop_borders(arr_res, filter)
+        pass
 
     arr_res = arr_res + offset
 

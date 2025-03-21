@@ -16,13 +16,14 @@ def _type_verification(value):
             return None
 
 def _read_3d_files(file: TextIOWrapper):
-    pass
+    values_list = []
+
 
 def _read_detailed_files(file: TextIOWrapper):
     pass
 
 def _read_normal_files(file: TextIOWrapper):
-    values_list = []
+    values_2d_list = []
     readlines = file.readlines()
     file.close()
 
@@ -34,9 +35,9 @@ def _read_normal_files(file: TextIOWrapper):
             if item_ver != None:
                 line_itens.append(item_ver)
         
-        values_list.append(line_itens)
+        values_2d_list.append(line_itens)
 
-    return np.array(values_list)
+    return np.array(values_2d_list)
 
 def _find_file_folder(file_name: str):
     for folder in FOLDERS:

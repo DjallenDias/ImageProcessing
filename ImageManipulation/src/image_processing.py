@@ -62,3 +62,48 @@ def _crop_zeros(arr: np.ndarray):
     arr = arr[:, ~np.all(arr == 0, axis = 0)]
 
     return arr
+
+def _apply_filter_in_array(arr: np.ndarray, filter: np.ndarray,
+                           offset: int = 0, step: int = 1, actv_func: str = ""):
+    
+    arr_res = np.zeros(arr.shape)
+
+    for i in range(0, arr.shape[0], step):
+        for j in range(0, arr.shape[1], step):
+
+            arr_part = arr[i:i + filter.shape[0], j:j + filter.shape[1]]
+
+            if arr_part.shape != filter.shape: continue
+
+            arr_res[i,j] = np.sum(arr_part * filter)
+
+    arr_res = _crop_zeros(arr_res)
+    arr_res = arr_res + offset
+    if actv_func:
+        arr_res = np.vectorize(ReLU)(arr_res)
+
+    return arr_res.astype(np.uint8)
+
+def apply_filter(img_name: str, filter_name: str,
+                 offset: int = 0, step: int = 1, actv_func: str = ""):
+    
+    img = _open_image(img_name)
+    filter = _load_filter(filter_name)
+
+    if type(filter) == dict:
+        offset = filter["offset"]
+        step = filter["step"]
+        actv_func = filter["function"]
+        filter = filter["filter"]
+
+    elif type(filter) != np.ndarray:
+        print(f"Invalid filter name {filter_name}")
+        return None
+
+    r, g, b = _img_to_rgb_arr(img)
+
+    r = _apply_filter_in_array(r, filter, offset, step, actv_func)
+    g = _apply_filter_in_array(g, filter, offset, step, actv_func)
+    b = _apply_filter_in_array(b, filter, offset, step, actv_func)
+
+    return _rgb_to_img(r, g, b)

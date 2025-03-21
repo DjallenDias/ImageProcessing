@@ -1,11 +1,13 @@
 import numpy as np
 import PIL.Image
 from PIL import Image
+import os.path as path
 
-import file_reading
+import src.file_reading as file_reading
 
 def _open_image(img_name: str):
-    return PIL.Image.open(img_name)
+    img_path = f"img/{img_name}"
+    return PIL.Image.open(img_path)
 
 def _load_filter(filter_name: str):
     return file_reading.read_file(filter_name)

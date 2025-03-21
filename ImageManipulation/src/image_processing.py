@@ -12,8 +12,7 @@ def _open_image(img_name: str):
 def _load_filter(filter_name: str):
     return file_reading.read_file(filter_name)
 
-def _img_to_rgb_arr(img_name: str):
-    img = _open_image(img_name)
+def _img_to_rgb_arr(img: Image.Image):
     r = np.array(img.getchannel("R"))
     g = np.array(img.getchannel("G"))
     b = np.array(img.getchannel("B"))
@@ -30,3 +29,29 @@ def _rgb_to_img(r: np.ndarray, g: np.ndarray, b: np.ndarray):
     image_b = Image.merge("RGB", (Image.new("L", b_img.size, 0), Image.new("L", b_img.size, 0), b_img))
 
     return Image.merge("RGB", (r_img, g_img, b_img))
+
+def _g_in_rgb(img: Image.Image):
+    g = img.getchannel("G")
+
+    return Image.merge("RGB", (g, g, g))
+
+def _yiq_y_in_rgb(img: Image.Image):
+    r, g, b = _img_to_rgb_arr(img)
+
+    y = 0.299*r + 0.587*g + 0.114*b
+    y = y.astype(np.uint8)
+
+    y_rgb = np.stack([y, y, y], axis=-1)
+
+    return Image.fromarray(y_rgb, mode="RGB")
+
+def colored_to_gray_img(img_name: str, mode: str = "RGB"):
+    img = _open_image(img_name)
+
+    if mode == "RGB":
+        return _g_in_rgb(img)
+    elif mode == "YIQ":
+        return _yiq_y_in_rgb(img)
+    else:
+        print(f"Invalid mode {mode}.")
+        return None

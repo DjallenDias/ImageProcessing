@@ -3,7 +3,7 @@ offset
 step
 2
 function
-relu
+ReLU
 filter
 -1 -2 -1
 0 0 0

@@ -237,12 +237,14 @@ def apply_filter(img_name: str, filter_name: str,
 
     return _rgb_to_img(r, g, b)
 
-def border_detection(img_name: str):
+def border_detection(img_name: str, gray: bool = False):
     img = _open_image(img_name)
     hor_sobel = _load_filter("hor_sobel.txt")
     ver_sobel = _load_filter("ver_sobel.txt")
 
     r, g, b = _img_to_rgb_arr(img)
+    if gray:
+        r = b = g
 
     hr = _apply_filter_in_array(r, hor_sobel)
     hg = _apply_filter_in_array(g, hor_sobel)

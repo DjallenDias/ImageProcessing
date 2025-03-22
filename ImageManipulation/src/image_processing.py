@@ -168,6 +168,23 @@ def _apply_filter_in_array(arr: np.ndarray, filter: np.ndarray,
 
     return arr_res.astype(np.int64)
 
+def _apply_3d_filter_in_img(img: Image.Image, filter: np.ndarray,
+                           offset: int = 0, step: int = 1, actv_func: str = ""):
+    
+    filter_r = filter[0]
+    filter_g = filter[1]
+    filter_b = filter[2]
+
+    r, g, b = _img_to_rgb_arr(img)
+
+    r = _apply_filter_in_array(r, filter_r, offset, step, actv_func)
+    g = _apply_filter_in_array(g, filter_g, offset, step, actv_func)
+    b = _apply_filter_in_array(b, filter_b, offset, step, actv_func)
+
+    arr_res = r + g + b
+
+    return arr_res
+
 def apply_filter(img_name: str, filter_name: str,
                  offset: int = 0, step: int = 1, actv_func: str = "",
                  handle_overflow: str = "", handle_underflow: str = ""):
@@ -184,12 +201,16 @@ def apply_filter(img_name: str, filter_name: str,
     elif type(filter) != np.ndarray:
         print(f"Invalid filter name {filter_name}")
         return None
+    
+    if len(filter.shape) == 3:
+        r = g = b = _apply_3d_filter_in_img(img, filter, offset, step, actv_func)
+    
+    else:
+        r, g, b = _img_to_rgb_arr(img)
 
-    r, g, b = _img_to_rgb_arr(img)
-
-    r = _apply_filter_in_array(r, filter, offset, step, actv_func)
-    g = _apply_filter_in_array(g, filter, offset, step, actv_func)
-    b = _apply_filter_in_array(b, filter, offset, step, actv_func)
+        r = _apply_filter_in_array(r, filter, offset, step, actv_func)
+        g = _apply_filter_in_array(g, filter, offset, step, actv_func)
+        b = _apply_filter_in_array(b, filter, offset, step, actv_func)
 
     handles_methods = {"clip": _clip,
                        "wrap": _wrap,

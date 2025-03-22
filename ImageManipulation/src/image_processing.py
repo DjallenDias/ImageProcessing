@@ -181,7 +181,7 @@ def _apply_3d_filter_in_img(img: Image.Image, filter: np.ndarray,
     g = _apply_filter_in_array(g, filter_g, offset, step, actv_func)
     b = _apply_filter_in_array(b, filter_b, offset, step, actv_func)
 
-    arr_res = r + g + b
+    arr_res = np.abs(r) + np.abs(g) + np.abs(b)
 
     return arr_res
 

@@ -237,6 +237,38 @@ def apply_filter(img_name: str, filter_name: str,
 
     return _rgb_to_img(r, g, b)
 
+def hor_sobel(img_name: str):
+    img = _open_image(img_name)
+    hor_sobel = _load_filter("hor_sobel.txt")
+
+    r, g, b = _img_to_rgb_arr(img)
+
+    r = np.abs(_apply_filter_in_array(r, hor_sobel))
+    g = np.abs(_apply_filter_in_array(g, hor_sobel))
+    b = np.abs(_apply_filter_in_array(b, hor_sobel))
+
+    r = _expansion_array(r)
+    g = _expansion_array(g)
+    b = _expansion_array(b)
+
+    return _rgb_to_img(r, g, b)
+
+def ver_sobel(img_name: str):
+    img = _open_image(img_name)
+    ver_sobel = _load_filter("hor_sobel.txt")
+
+    r, g, b = _img_to_rgb_arr(img)
+
+    r = np.abs(_apply_filter_in_array(r, ver_sobel))
+    g = np.abs(_apply_filter_in_array(g, ver_sobel))
+    b = np.abs(_apply_filter_in_array(b, ver_sobel))
+
+    r = _expansion_array(r)
+    g = _expansion_array(g)
+    b = _expansion_array(b)
+
+    return _rgb_to_img(r, g, b)
+
 def border_detection(img_name: str, gray: bool = False):
     img = _open_image(img_name)
     hor_sobel = _load_filter("hor_sobel.txt")

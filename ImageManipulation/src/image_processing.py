@@ -187,7 +187,8 @@ def _apply_3d_filter_in_img(img: Image.Image, filter: np.ndarray,
 
 def apply_filter(img_name: str, filter_name: str,
                  offset: int = 0, step: int = 1, actv_func: str = "",
-                 handle_overflow: str = "", handle_underflow: str = ""):
+                 absolute_value: bool = False
+                 handle_overflow: str = "", handle_underflow: str = "",):
     
     img = _open_image(img_name)
     filter = _load_filter(filter_name)
@@ -211,6 +212,11 @@ def apply_filter(img_name: str, filter_name: str,
         r = _apply_filter_in_array(r, filter, offset, step, actv_func)
         g = _apply_filter_in_array(g, filter, offset, step, actv_func)
         b = _apply_filter_in_array(b, filter, offset, step, actv_func)
+
+    if absolute_value:
+        r = np.abs(r)
+        g = np.abs(g)
+        b = np.abs(b)
 
     handles_methods = {"clip": _clip,
                        "wrap": _wrap,

@@ -255,7 +255,7 @@ def hor_sobel(img_name: str):
 
 def ver_sobel(img_name: str):
     img = _open_image(img_name)
-    ver_sobel = _load_filter("hor_sobel.txt")
+    ver_sobel = _load_filter("ver_sobel.txt")
 
     r, g, b = _img_to_rgb_arr(img)
 

@@ -187,7 +187,7 @@ def _apply_3d_filter_in_img(img: Image.Image, filter: np.ndarray,
 
 def apply_filter(img_name: str, filter_name: str,
                  offset: int = 0, step: int = 1, actv_func: str = "",
-                 absolute_value: bool = False
+                 absolute_value: bool = False,
                  handle_overflow: str = "", handle_underflow: str = "",):
     
     img = _open_image(img_name)
